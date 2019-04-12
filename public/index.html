@@ -6,15 +6,37 @@
     <title>Test Stripe</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <h1>Test Stripe</h1>
+    <div id="log"></div>
 </body>
 <script>
 
+    const appendToLog = text => {
+        document.querySelector('#log').innerText += `\n${text}`;
+    }
+
+    const createPaymentSession = async () => {
+        appendToLog('Creating payment session');
+        const response = await axios.post('/api/createPaymentSession');
+        appendToLog('Payment session created');
+        console.log(response.data);
+        return response.data;
+    }
+
+    const createStripeCheckout = async (sessionId) => {
+        appendToLog('Creating checkout');
+        const stripe = Stripe('pk_test_wV57LeY7evRqejl000lMT7Cl00c3JGkFJZ', { betas: ['checkout_beta_4'] });
+        const result = await stripe.redirectToCheckout({ sessionId });
+        console.log(result);
+        appendToLog('Checkout created');
+    }
+
     const main = async () => {
-        const response = await axios.post('/api/payment');
-        alert(response.data);
+        const paymentSession = await createPaymentSession();
+        await createStripeCheckout(paymentSession.id);
     }
     
     main();
